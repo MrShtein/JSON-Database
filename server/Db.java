@@ -7,6 +7,7 @@ public class Db {
     HashMap<Integer, String> values;
 
     public Db() {
+        values = new HashMap<>();
         hashMapInit();
     }
 
@@ -19,6 +20,8 @@ public class Db {
     public void setValue(int num, String value) {
         if (checkNum(num)) {
             values.put(num, value);
+            System.out.println("OK");
+            return;
         }
         throw new IllegalArgumentException("ERROR");
     }
@@ -45,6 +48,8 @@ public class Db {
     public void deleteValue(int num) {
         if (checkNum(num)) {
             values.put(num, "");
+            System.out.println("OK");
+            return;
         }
         throw new IllegalArgumentException("ERROR");
     }
