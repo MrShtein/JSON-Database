@@ -1,4 +1,4 @@
-package server;
+package server.Db;
 
 import java.util.HashMap;
 
@@ -12,16 +12,15 @@ public class Db {
     }
 
     private void hashMapInit() {
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 1000; i++) {
             values.put(i, "");
         }
     }
 
-    public void setValue(int num, String value) {
+    public String setValue(int num, String value) throws IllegalArgumentException {
         if (checkNum(num)) {
             values.put(num, value);
-            System.out.println("OK");
-            return;
+            return "OK";
         }
         throw new IllegalArgumentException("ERROR");
     }
@@ -45,13 +44,12 @@ public class Db {
         return value;
     }
 
-    public void deleteValue(int num) {
+    public String deleteValue(int num) {
         if (checkNum(num)) {
             values.put(num, "");
-            System.out.println("OK");
-            return;
+            return "OK";
         }
-        throw new IllegalArgumentException("ERROR");
+        return "ERROR";
     }
 
 }
