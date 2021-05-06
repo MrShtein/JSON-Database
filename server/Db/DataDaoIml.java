@@ -1,5 +1,9 @@
 package server.Db;
 
+
+
+import client.Data;
+
 public class DataDaoIml {
     Db db;
 
@@ -7,19 +11,15 @@ public class DataDaoIml {
         this.db = new Db();
     }
 
-    public String setDataToDb(int index, String value) {
-        return db.setValue(index, value);
+    public String setDataToDb(Data jo) {
+       return db.setValue(jo);
     }
 
-    public String getDataFromDb(int index) {
-        try {
-            return db.getValue(index);
-        } catch (Exception e) {
-            return e.getMessage();
-        }
+    public String getDataFromDb(String key) {
+        return db.getValue(key);
     }
 
-    public String deleteDataFromDb(int index) {
-        return db.deleteValue(index);
+    public String deleteDataFromDb(String key) throws Exception {
+        return db.deleteValue(key);
     }
 }

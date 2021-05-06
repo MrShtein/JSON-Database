@@ -1,25 +1,28 @@
 package client.argsWorker;
 
-import com.beust.jcommander.IDefaultProvider;
 import com.beust.jcommander.Parameter;
 
 
 public class Args {
     @Parameter(names = "-t", description = "-t is the type of the request")
-    private String type = "";
+    private String type;
 
-    @Parameter(names = "-i", description = "-i is the index of the cell")
-    private Integer cellIndex;
+    @Parameter(names = "-k", description = "-k is the key")
+    private String key;
 
-    @Parameter(names = "-m", description = " -m is the value to save in the database")
+    @Parameter(names = "-v", description = " -v is the value to save in the database")
     private String value;
 
-    @Override
-    public String toString() {
-        String tempType = type == null ? "" : type;
-        String tempCellIndex = cellIndex == null ? "" : String.valueOf(cellIndex);
-        String tempValue = value == null ? "" : value;
-        return tempType + "+" + tempCellIndex + "+" + tempValue;
+    public String getType() {
+        return type;
+    }
+
+    public String getCellIndex() {
+        return key;
+    }
+
+    public String getValue() {
+        return value;
     }
 }
 

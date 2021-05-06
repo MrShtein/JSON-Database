@@ -1,55 +1,48 @@
 package server.Db;
 
-import java.util.HashMap;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.sun.jdi.IntegerValue;
+
+import client.Data;
+import server.BooleanData;
+import server.IntegerData;
+import server.StringData;
 
 public class Db {
 
-    HashMap<Integer, String> values;
+    JsonObject db;
 
     public Db() {
-        values = new HashMap<>();
-        hashMapInit();
+        this.db = new JsonObject();
     }
 
-    private void hashMapInit() {
-        for (int i = 1; i <= 1000; i++) {
-            values.put(i, "");
+    public String setValue(Data data) throws IllegalArgumentException {
+        if (data.getClass() == BooleanData.class) {
+            BooleanData booleanData = (BooleanData) data;
+            db.addProperty(booleanData.getKey(), booleanData.isValue());
+        } else if (data.getClass() == IntegerData.class) {
+            IntegerData integerData = (IntegerData) data;
+            db.addProperty(integerData.getKey(), integerData.getValue());
+        } else {
+            StringData stringData = (StringData) data;
+            db.addProperty(stringData.getKey(), stringData.getValue());
         }
+        return "OK";
     }
 
-    public String setValue(int num, String value) throws IllegalArgumentException {
-        if (checkNum(num)) {
-            values.put(num, value);
-            return "OK";
+    public String getValue(String key) {
+        return db.get(key).getAsString();
+    }
+
+    public String deleteValue(String key) throws Exception {
+        JsonElement response = db.remove(key);
+        if (response == null) {
+            throw new Exception("No such key");
         }
-        throw new IllegalArgumentException("ERROR");
+        return "OK";
     }
 
-    public String getValue(int num) throws Exception {
-        if (checkNum(num)) {
-            String value = values.get(num);
-            return checkValue(value);
-        }
-        throw new Exception("ERROR");
-    }
 
-    public boolean checkNum(int num) {
-        return num >= 1 && num <= 100;
-    }
-
-    public String checkValue(String value) throws Exception {
-        if ("".equals(value)) {
-            throw new Exception("ERROR");
-        }
-        return value;
-    }
-
-    public String deleteValue(int num) {
-        if (checkNum(num)) {
-            values.put(num, "");
-            return "OK";
-        }
-        return "ERROR";
-    }
 
 }
