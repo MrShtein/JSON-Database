@@ -2,6 +2,8 @@ package server.Db;
 
 
 
+import java.io.IOException;
+
 import client.Data;
 
 public class DataDaoIml {
@@ -15,7 +17,7 @@ public class DataDaoIml {
        return db.setValue(jo);
     }
 
-    public String getDataFromDb(String key) {
+    public String getDataFromDb(String key) throws IOException {
         return db.getValue(key);
     }
 

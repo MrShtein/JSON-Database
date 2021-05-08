@@ -14,4 +14,5 @@ public class BooleanData extends Data {
     public boolean isValue() {
         return value;
     }
+
 }

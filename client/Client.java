@@ -2,6 +2,7 @@ package client;
 
 import com.beust.jcommander.JCommander;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -46,7 +47,20 @@ public class Client extends Thread {
                 .addObject(arguments)
                 .build()
                 .parse(args);
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        String response = null;
+        if (!"".equals(arguments.getPath())) {
+            try {
+                response = new ReadFromFile(System
+                        .getProperty("user.dir") + "/src/client/data/" +
+                        arguments.getPath())
+                        .readFile();
+                return response;
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+
+        }
         return gson.toJson(arguments);
     }
 }
