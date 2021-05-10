@@ -24,7 +24,7 @@ public class Args {
         return type;
     }
 
-    public String getCellIndex() {
+    public String getKey() {
         return key;
     }
 

@@ -2,6 +2,8 @@ package server.Db;
 
 
 
+import com.google.gson.JsonElement;
+
 import java.io.IOException;
 
 import client.Data;
@@ -17,11 +19,11 @@ public class DataDaoIml {
        return db.setValue(jo);
     }
 
-    public String getDataFromDb(String key) throws IOException {
-        return db.getValue(key);
+    public JsonElement getDataFromDb(Data data) throws IOException {
+        return db.getValue(data);
     }
 
-    public String deleteDataFromDb(String key) throws Exception {
-        return db.deleteValue(key);
+    public String deleteDataFromDb(Data data) throws Exception {
+        return db.deleteValue(data);
     }
 }

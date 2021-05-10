@@ -1,14 +1,17 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Objects;
 
 import client.Data;
-import client.argsWorker.Args;
 import server.Db.DataDaoIml;
 
 public class WorkWithTasks implements Runnable {
@@ -35,46 +38,63 @@ public class WorkWithTasks implements Runnable {
             DataInputStream input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
             message = input.readUTF();
-        } catch (IOException e) {
+
+            StringData data = null;
+            JsonObject request = JsonParser.parseString(message).getAsJsonObject();
+
+            String type = request.get("type").getAsString();
+            if ("exit".equals(type)) {
+                server.isWork = false;
+                try {
+                    output.writeUTF(gson.toJson(new DeleteOkResponse("OK")));
+                    return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (hasArrayInKey(request)) {
+                data = getKeyValueFromJsonArray(request);
+                data.setHasArray(true);
+            } else {
+                String key = request.get("key").getAsString();
+                JsonElement value = request.get("value");
+                if (value == null) {
+                    data = new StringData(key, "");
+                } else {
+                    data = new StringData(key, value.toString());
+                }
+                data.setHasArray(false);
+            }
+
+            switch (type) {
+                case "set":
+                    try {
+                        setData(data, output);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case "get":
+
+                    getData(data, output);
+
+                    break;
+                case "delete":
+                    try {
+                        deleteData(data, output);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("ERROR");
+            }
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
 
-        Args request = gson.fromJson(message, Args.class);
-        StringData data = new StringData(request.getCellIndex(), request.getValue());
-        String type = request.getType();
-
-        switch (type) {
-            case "set":
-                try {
-                    setData(data, output);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case "get":
-
-                getData(data, output);
-
-                break;
-            case "delete":
-                try {
-                    deleteData(data, output);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case "exit":
-                server.isWork = false;
-                try {
-                    output.writeUTF(gson.toJson(new DeleteOkResponse("OK")));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("ERROR");
-        }
     }
 
     public void setData(Data data, DataOutputStream output) throws IOException {
@@ -91,7 +111,7 @@ public class WorkWithTasks implements Runnable {
 
     public void getData(Data data, DataOutputStream output) {
         try {
-            String response = dataDaoIml.getDataFromDb(data.getKey());
+            JsonElement response = dataDaoIml.getDataFromDb(data);
             GetOkResponse getOkResponse = new GetOkResponse("OK", response);
             output.writeUTF(gson.toJson(getOkResponse));
         } catch (NullPointerException | IOException e) {
@@ -106,7 +126,7 @@ public class WorkWithTasks implements Runnable {
 
     public void deleteData(Data data, DataOutputStream output) throws IOException {
         try {
-            String response = dataDaoIml.deleteDataFromDb(data.getKey());
+            String response = dataDaoIml.deleteDataFromDb(data);
             DeleteOkResponse getOkResponse = new DeleteOkResponse(response);
             output.writeUTF(gson.toJson(getOkResponse));
         } catch (Exception e) {
@@ -120,13 +140,28 @@ public class WorkWithTasks implements Runnable {
         String value = stringData.getValue();
         boolean isBoolean = "true".equalsIgnoreCase(value)
                 || "false".equalsIgnoreCase(value);
-        boolean isInteger = value.matches("\\d+");
+        boolean isInteger = value.matches("[^\"]\\d+[^\"]");
         if (isBoolean) {
             return new BooleanData(data.getKey(), Boolean.parseBoolean(stringData.getValue()));
         } else if (isInteger) {
             return new IntegerData(data.getKey(), Integer.parseInt(stringData.getValue()));
         } else {
             return data;
+        }
+    }
+
+    public boolean hasArrayInKey(JsonObject jo) {
+        JsonElement je = jo.get("key");
+        return je.isJsonArray();
+    }
+
+    public StringData getKeyValueFromJsonArray(JsonObject jo) {
+        String key = jo.get("key").getAsJsonArray().toString();
+        JsonElement value = jo.get("value");
+        if (value == null) {
+            return new StringData(key, "");
+        } else {
+            return new StringData(key, value.getAsString());
         }
     }
 }
